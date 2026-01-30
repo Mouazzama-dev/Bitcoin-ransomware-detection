@@ -1,0 +1,16 @@
+# Virtual Environment
+btc_env/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDEs
+.vscode/
+.idea/
+
+# Data
+*.csv
+*.parquet
