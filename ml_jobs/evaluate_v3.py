@@ -9,17 +9,17 @@ spark = SparkSession.builder.appName("ModelEvaluationV3").getOrCreate()
 data = spark.read.parquet("hdfs://namenode:9000/user/mouazzama/all_transactions")
 model = PipelineModel.load("hdfs://namenode:9000/user/mouazzama/models/rf_binary_balanced")
 
-# 2. Binary Label banayein (taake evaluation ground truth se ho)
+# 2. Binary Label data
 test_data = data.withColumn("binary_label", when(col("label") == "white", 0.0).otherwise(1.0))
 
-# 3. Predictions generate karein
+# 3. Predictions 
 predictions = model.transform(test_data)
 
-# 4. Evaluators define karein
+# 4. Evaluators 
 evaluator_acc = MulticlassClassificationEvaluator(labelCol="binary_label", predictionCol="prediction", metricName="accuracy")
 evaluator_f1 = MulticlassClassificationEvaluator(labelCol="binary_label", predictionCol="prediction", metricName="f1")
 
-# 5. Metrics Calculate karein
+# 5. Metrics 
 accuracy = evaluator_acc.evaluate(predictions)
 f1_score = evaluator_f1.evaluate(predictions)
 

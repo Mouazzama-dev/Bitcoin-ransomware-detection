@@ -6,7 +6,7 @@ from pyspark.ml import PipelineModel
 # 1. Spark Session
 spark = SparkSession.builder.appName("LiveRansomwareDetection").getOrCreate()
 
-# 2. Schema Define karein
+# 2. Schema 
 schema = StructType([
     StructField("address", StringType()),
     StructField("year", IntegerType()),
@@ -23,11 +23,9 @@ schema = StructType([
 # 3. Model Load (Binary Balanced Version)
 model = PipelineModel.load("hdfs://namenode:9000/user/mouazzama/models/rf_binary_balanced")
 
-# 4. UDF define karein probability vector se Ransomware prob (index 1) nikalne ke liye
-# Spark ML ka probability column ek Vector hota hai, isliye UDF zaroori hai
 extract_prob_udf = udf(lambda v: float(v[1]), FloatType())
 
-# 5. Kafka Stream Connect karein
+# 5. Kafka Stream Connect
 df = spark.readStream.format("kafka") \
     .option("kafka.bootstrap.servers", "broker:9092") \
     .option("subscribe", "btc-transactions") \
@@ -41,8 +39,7 @@ parsed_df = df.selectExpr("CAST(value AS STRING)") \
 # 7. Model Transformation
 predictions = model.transform(parsed_df)
 
-# 8. Threshold Logic apply karein (0.3 sensitivity)
-# Hum 0.5 ke bajaye 0.3 use kar rahe hain taake detection behtar ho
+# 8. Threshold Logic (0.3 sensitivity)
 final_view = predictions.withColumn("ransom_prob", extract_prob_udf(col("probability"))) \
     .select(
         "address", 
